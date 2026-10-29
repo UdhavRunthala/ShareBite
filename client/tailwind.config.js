@@ -1,0 +1,16 @@
+export default {
+  darkMode: ['class'],
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  theme: {
+    extend: {
+      colors: {
+        background: 'var(--background)', foreground: 'var(--foreground)',
+        primary: 'var(--primary)', 'primary-foreground': 'var(--primary-foreground)',
+        muted: 'var(--muted)', border: 'var(--border)', saffron: 'var(--saffron)',
+        clay: 'var(--clay)', card: 'var(--card)',
+      },
+      fontFamily: { display: ['Fraunces', 'Georgia', 'serif'], sans: ['Plus Jakarta Sans', 'sans-serif'] },
+      borderRadius: { xl: 'var(--radius-control)', '2xl': 'var(--radius-card)' },
+    },
+  },
+};

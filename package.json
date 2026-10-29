@@ -1,0 +1,10 @@
+{
+  "name": "sharebite", "version": "1.0.0", "private": true, "type": "module",
+  "workspaces": ["client", "server"],
+  "scripts": {
+    "dev": "concurrently -k -n server,client -c green,yellow \"npm run dev -w server\" \"npm run dev -w client\"",
+    "seed": "npm run seed -w server", "build": "npm run build -w client && npm run build -w server",
+    "lint": "eslint .", "test": "npm run test -w server"
+  },
+  "devDependencies": { "concurrently": "^9.1.2", "eslint": "^9.22.0", "@eslint/js": "^9.22.0", "globals": "^16.0.0", "eslint-plugin-react-hooks": "^5.2.0", "@playwright/test": "^1.51.1" }
+}
