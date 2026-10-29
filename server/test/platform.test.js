@@ -65,3 +65,15 @@ test('distribution requires pickup and owned proof, increments meals once and en
   const denied = await request(app).get(uploaded.body.url).set('Authorization',`Bearer ${issueToken(outsider)}`);
   assert.equal(denied.status,403);
 });
+test('chat masks contact details and rejects nonparticipants', async () => {
+  const listing = await Listing.findOne({ foodName:'Test meal boxes' });
+  const order = await Order.findOne({ listing:listing._id });
+  const ngo = await User.findById(order.ngo);
+  const sent = await request(app).post(`/api/chat/${order._id}`).set('Authorization',`Bearer ${issueToken(ngo)}`).send({ text:'Call +91 98765 43210 or hello@example.com, @team please.' });
+  assert.equal(sent.status,201);
+  assert.equal(sent.body.maskedText.includes('98765'),false);
+  assert.equal(sent.body.text,undefined);
+  const outsider = await User.findOne({ role:'ngo',_id:{$ne:ngo._id} });
+  const denied = await request(app).get(`/api/chat/${order._id}`).set('Authorization',`Bearer ${issueToken(outsider)}`);
+  assert.equal(denied.status,404);
+});
