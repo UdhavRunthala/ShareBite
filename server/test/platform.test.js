@@ -7,6 +7,7 @@ import { createApp } from '../src/app.js';
 import { User, Listing, Order, Review } from '../src/models/index.js';
 import { issueToken } from '../src/auth.js';
 import { mealsFor } from '../src/recognition.js';
+import { expireListings } from '../src/expiry.js';
 let app;
 before(async () => { app = createApp(await connectDatabase()); await seedDatabase(); });
 after(closeDatabase);
@@ -90,4 +91,12 @@ test('admin reviews private documents and bans invalidate existing tokens', asyn
   await request(app).patch(`/api/admin/users/${donor._id}`).set('Authorization',adminAuth).send({banned:true});
   assert.equal((await request(app).get('/api/auth/me').set('Authorization',donorAuth)).status,401);
   await request(app).patch(`/api/admin/users/${donor._id}`).set('Authorization',adminAuth).send({banned:false});
+});
+test('expiry closes uncollected listings once and preserves completed orders', async () => {
+  const available=await Listing.findOne({status:'Available'});
+  await Listing.updateOne({_id:available._id},{pickupBy:new Date(Date.now()-1000)});
+  assert.ok(await expireListings()>=1);
+  assert.equal((await Listing.findById(available._id)).status,'Expired');
+  assert.equal(await expireListings(),0);
+  assert.equal(await Order.countDocuments({status:'Distributed'}),37);
 });
