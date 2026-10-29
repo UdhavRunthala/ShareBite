@@ -77,3 +77,17 @@ test('chat masks contact details and rejects nonparticipants', async () => {
   const denied = await request(app).get(`/api/chat/${order._id}`).set('Authorization',`Bearer ${issueToken(outsider)}`);
   assert.equal(denied.status,404);
 });
+test('admin reviews private documents and bans invalidate existing tokens', async () => {
+  const admin=await User.findOne({role:'admin'}), donor=await User.findOne({email:'donor@demo.com'});
+  const adminAuth=`Bearer ${issueToken(admin)}`, donorAuth=`Bearer ${issueToken(donor)}`;
+  assert.equal((await request(app).get('/api/admin/users').set('Authorization',donorAuth)).status,403);
+  const users=await request(app).get('/api/admin/users').set('Authorization',adminAuth);
+  const pending=users.body.find(user=>user.role==='ngo'&&user.verificationStatus==='pending');
+  assert.equal((await request(app).get(pending.profile.documents[0])).status,403);
+  assert.equal((await request(app).get(pending.profile.documents[0]).set('Authorization',adminAuth)).headers['content-type'],'application/pdf');
+  const approved=await request(app).patch(`/api/admin/users/${pending._id}`).set('Authorization',adminAuth).send({verificationStatus:'verified'});
+  assert.equal(approved.status,200);
+  await request(app).patch(`/api/admin/users/${donor._id}`).set('Authorization',adminAuth).send({banned:true});
+  assert.equal((await request(app).get('/api/auth/me').set('Authorization',donorAuth)).status,401);
+  await request(app).patch(`/api/admin/users/${donor._id}`).set('Authorization',adminAuth).send({banned:false});
+});
