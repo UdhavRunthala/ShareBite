@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { config } from './config.js';
 import { authRouter, optionalAuth } from './auth.js';
 import { errorHandler } from './http.js';
+import { listingsRouter } from './routes/listings.js';
 export function createApp(databaseMode) {
   const app = express();
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
@@ -12,6 +13,7 @@ export function createApp(databaseMode) {
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', databaseMode, demo: config.demo }));
   app.use('/api', optionalAuth);
   app.use('/api/auth', authRouter);
+  app.use('/api/listings', listingsRouter);
   app.use('/api', (_req, res) => res.status(404).json({ message: 'This endpoint does not exist.' }));
   app.use(errorHandler);
   return app;
