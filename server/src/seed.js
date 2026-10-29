@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { User, DonorProfile, NGOProfile, Listing, Order, Message, Review, Certificate, Report, Notification, DemandRequest } from './models/index.js';
 import { neighbourhoods, donors, ngos, foods, photos } from './seed-data.js';
 import { safeUntil, tierFor } from './domain.js';
+import { demoDocument } from './seed-documents.js';
 const hours = n => n * 3600000;
 export async function seedDatabase() {
   if (await User.exists({})) { console.log('[ShareBite] Database already contains users; seed skipped without deleting data.'); return; }
@@ -21,6 +22,12 @@ export async function seedDatabase() {
     await NGOProfile.create({ user: user._id, registrationNumber: `DEMO-RJ-SOC-${2010 + i}-${180 + i}`, documents: [], areasServed: [neighbourhoods[i % 12][0], neighbourhoods[(i + 1) % 12][0]], capacity, hasVehicle: i % 3 !== 2, about, peopleFed: 0 });
   }
   const admin = await User.create({ name: 'Aditi · ShareBite', email: 'admin@demo.com', passwordHash, role: 'admin', verificationStatus: 'verified', isDemo: true });
+  for (const user of [...donorUsers,...ngoUsers]) {
+    const model=user.role==='ngo'?NGOProfile:DonorProfile;
+    const profile=await model.findOne({user:user._id});
+    profile.documents=[await demoDocument(user,profile.registrationNumber||profile.fssaiNumber)];
+    await profile.save();
+  }
   const listings = [], completed = [], totals = new Map();
   for (let i = 0; i < 68; i++) {
     const historical = i < 36;
