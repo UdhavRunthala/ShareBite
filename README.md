@@ -18,3 +18,5 @@ The client uses http://localhost:5173 and proxies API requests to port 4000. Run
 The [design brief](docs/design-brief.md) defines the neighbourhood-table identity. [Architecture contracts](docs/architecture.md) describe authorization, data privacy, seed behaviour and runtime assumptions. Feature branches are validated and merged through reviewed pull requests; descriptions are retained under `docs/pull-requests/`.
 
 Current milestone: repository and development tooling. Application features and the three-minute demo guide will be documented as their branches land.
+
+thats all.
