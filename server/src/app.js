@@ -10,6 +10,7 @@ import { uploadsRouter } from './routes/uploads.js';
 import { chatRouter, notificationsRouter } from './routes/chat.js';
 import { statsRouter, leaderboardRouter, certificatesRouter } from './routes/impact.js';
 import { ngosRouter, usersRouter, demandsRouter, reportsRouter } from './routes/community.js';
+import { adminRouter } from './routes/admin.js';
 export function createApp(databaseMode) {
   const app = express();
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
@@ -30,6 +31,7 @@ export function createApp(databaseMode) {
   app.use('/api/users',usersRouter);
   app.use('/api/demands',demandsRouter);
   app.use('/api/reports',reportsRouter);
+  app.use('/api/admin',adminRouter);
   app.use('/api', (_req, res) => res.status(404).json({ message: 'This endpoint does not exist.' }));
   app.use(errorHandler);
   return app;
