@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useParams } from 'react-router-dom';
-import { BarChart2, TrendingUp, Package, Heart, Award, ShieldCheck, Users, Leaf, MapPin, ArrowUpRight } from 'lucide-react';
-import { query } from '../lib/api';
+import { Link } from 'react-router-dom';
+import { BarChart2, TrendingUp, Package, Heart, Award, ShieldCheck, Users, Leaf, MapPin, ArrowUpRight, Plus } from 'lucide-react';
+import { api, query } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { Page, QueryState, Go } from '../components/workspace';
-import { Button, Card, Badge, StatCard, Reveal, Avatar, Skeletons, ErrorState } from '../components/ui';
+import { Page, QueryState, Go, useAction } from '../components/workspace';
+import { Button, Card, Badge, Field, StatCard, Reveal, Avatar, Skeletons, ErrorState } from '../components/ui';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { number, tierFor } from '../lib/utils';
 
@@ -52,7 +52,7 @@ function BadgeTiers({ mealsServed }) {
     <Card className="panel stack">
       <span className="eyebrow"><Award size={13} /> Badge progress</span>
       <div className="tier-track">
-        {tiers.map((tier, i) => {
+        {tiers.map(tier => {
           const achieved = mealsServed >= tier.threshold;
           const isCurrent = tier.name === current;
           return (
@@ -79,7 +79,6 @@ function BadgeTiers({ mealsServed }) {
 
 /* ─── Shared Dashboard Body ─── */
 function DashboardBody({ stats, myOrders }) {
-  const { user } = useAuth();
   const mealsServed = stats?.meals || 0;
   const co2 = stats?.co2 || 0;
   const kg = stats?.kg || 0;
@@ -87,7 +86,6 @@ function DashboardBody({ stats, myOrders }) {
 
   return (
     <div className="stack">
-      {/* Impact stats */}
       <div className="grid-4" style={{ marginBottom: 8 }}>
         <Reveal><StatCard label="Meals served" value={mealsServed} icon={Users} note="Verified by distribution proof" /></Reveal>
         <Reveal delay={0.05}><StatCard label="Food rescued" value={kg} unit="kg" icon={Package} note={`≈ ${number(co2)} kg CO₂ avoided`} /></Reveal>
@@ -98,7 +96,6 @@ function DashboardBody({ stats, myOrders }) {
       <ImpactChart series={stats?.series} />
       <BadgeTiers mealsServed={mealsServed} />
 
-      {/* Recent orders */}
       {myOrders?.length > 0 && (
         <Card className="panel stack">
           <div className="between">
@@ -131,6 +128,46 @@ function DashboardBody({ stats, myOrders }) {
   );
 }
 
+/* ─── Demand form ─── */
+function DemandForm() {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ title: '', description: '', meals: 100, neededBy: '', neighbourhood: 'C-Scheme' });
+  const field = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const submit = useAction(
+    () => api('/demands', { method: 'POST', body: { ...form, meals: Number(form.meals), neededBy: new Date(form.neededBy).toISOString() } }),
+    () => setOpen(false)
+  );
+
+  if (!open) return <Button size="sm" variant="secondary" onClick={() => setOpen(true)}><Plus size={14} /> New request</Button>;
+
+  return (
+    <form className="stack" onSubmit={e => { e.preventDefault(); submit.mutate(); }}>
+      <Field label="What does your community need?">
+        <input required minLength={5} maxLength={120} value={form.title} onChange={e => field('title', e.target.value)} placeholder="e.g. 200 meals for Sunday gathering" />
+      </Field>
+      <Field label="Details">
+        <textarea required minLength={10} maxLength={1000} value={form.description} onChange={e => field('description', e.target.value)} />
+      </Field>
+      <div className="grid-2">
+        <Field label="Meals needed">
+          <input type="number" min={1} max={10000} required value={form.meals} onChange={e => field('meals', e.target.value)} />
+        </Field>
+        <Field label="Needed by">
+          <input type="datetime-local" required value={form.neededBy} onChange={e => field('neededBy', e.target.value)} />
+        </Field>
+      </div>
+      <Field label="Neighbourhood">
+        <input required minLength={2} maxLength={80} value={form.neighbourhood} onChange={e => field('neighbourhood', e.target.value)} />
+      </Field>
+      <div className="row">
+        <Button disabled={submit.isPending}>{submit.isPending ? 'Posting…' : 'Post request'}</Button>
+        <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+      </div>
+    </form>
+  );
+}
+
 /* ─── Donor Dashboard ─── */
 export function DonorDashboard() {
   const stats = useQuery(query('my-stats', '/stats?mine=true'));
@@ -141,7 +178,7 @@ export function DonorDashboard() {
       eyebrow="YOUR IMPACT"
       title={<>Your generosity.<br /><em>Measured in meals.</em></>}
       description="Every donation, completed order, and distribution proof tells your story."
-      action={<Go to="/donate">Share food <ArrowUpRight size={14} /></Go>}
+      action={<Go to="/donate">Share food</Go>}
     >
       <QueryState query={stats}>
         {data => <DashboardBody stats={data} myOrders={orders.data || []} />}
@@ -161,17 +198,15 @@ export function NgoDashboard() {
       eyebrow="YOUR IMPACT"
       title={<>Your community.<br /><em>Fed with care.</em></>}
       description="Track collections, manage demands, and see the difference your team makes."
-      action={<Go to="/discover">Find food <ArrowUpRight size={14} /></Go>}
+      action={<Go to="/discover">Find food</Go>}
     >
       <QueryState query={stats}>
         {data => (
           <div className="stack">
             <DashboardBody stats={data} myOrders={orders.data || []} />
-
-            {/* Demand requests */}
             <Card className="panel stack">
               <div className="between">
-                <span className="eyebrow"><Package size={13} /> Your demand requests</span>
+                <span className="eyebrow"><Package size={13} /> Demand requests</span>
                 <DemandForm />
               </div>
               <QueryState query={demands} empty="Post a demand request to let donors know what you need.">
@@ -196,10 +231,4 @@ export function NgoDashboard() {
       </QueryState>
     </Page>
   );
-}
-
-/* ─── Demand form dialog ─── */
-function DemandForm() {
-  const { useAction: _, api: __ } = require('../lib/api');
-  return null; // placeholder — full form is in the NGO dashboard inline
 }

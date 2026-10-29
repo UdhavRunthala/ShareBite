@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Trophy, Medal, Crown, TrendingUp, Calendar, Download, Share2, ArrowUpRight, Leaf } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { api, query } from '../lib/api';
@@ -134,7 +134,7 @@ function CertificateCard({ cert }) {
 
 /* ─── Public certificate page ─── */
 export function CertificatePage() {
-  const { certId } = useParams ? require('react-router-dom').useParams() : { certId: '' };
+  const { certId } = useParams();
   const cert = useQuery(query(['cert', certId], `/certificates/${certId}`));
 
   return (
