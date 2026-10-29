@@ -9,14 +9,22 @@ const errors = [];
 mkdirSync('.cache/screenshots', { recursive: true });
 try {
   for (const width of [1440, 390]) {
-    const page = await browser.newPage({ viewport: { width, height: 960 } });
+    const page = await browser.newPage({ viewport: { width, height: 960 }, reducedMotion: 'reduce' });
     page.on('pageerror', error => { errors.push(error.message); console.error(error.message); });
-    page.on('console', message => { if (message.type() === 'error') console.error(message.text()); });
+    page.on('console', message => { if (message.type() === 'error') { errors.push(message.text());console.error(message.text()); } });
     await page.goto('http://localhost:5173', { waitUntil: 'domcontentloaded' });
-    await page.getByRole('heading', { name: 'ShareBite', exact: true }).waitFor();
+    await page.getByRole('heading', { name: /Good food/ }).waitFor();
+    await page.getByRole('button', {name:'View donation'}).first().waitFor();
+    await page.waitForTimeout(1200);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     if (overflow) errors.push(`Horizontal overflow at ${width}px`);
     await page.screenshot({ path: `.cache/screenshots/setup-${width}.png`, fullPage: true });
+    await page.getByRole('button',{name:'Bakery',exact:true}).click();
+    await page.getByRole('button',{name:'View donation'}).first().click();
+    await page.getByRole('dialog').waitFor();
+    await page.getByRole('button',{name:'Close dialog'}).click();
+    await page.getByRole('button',{name:'Switch to dark mode'}).click();
+    await page.screenshot({path:`.cache/screenshots/landing-dark-${width}.png`,fullPage:true});
     await page.close();
   }
   const response = await fetch('http://localhost:4000/api/health');
@@ -24,4 +32,6 @@ try {
   if (errors.length) throw new Error(errors.join('\n'));
   console.log('Desktop/mobile browser smoke and API health checks passed.');
 } finally { await browser.close(); }
+
+
 
