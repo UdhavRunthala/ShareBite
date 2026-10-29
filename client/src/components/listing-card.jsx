@@ -1,0 +1,9 @@
+import { MapPin, Users, ArrowUpRight, ShieldCheck, LockKeyhole, Flag } from 'lucide-react';
+import { Card, Badge, FoodImage, CountdownRing, Button } from './ui';
+export function ListingCard({ listing, onOpen, onReport, compact = false }) {
+  const available = listing.status === 'Available';
+  return <Card className={`listing-card ${compact ? 'compact' : ''}`}>
+    <div className="listing-photo"><FoodImage src={listing.photos?.[0]} alt={listing.foodName}/><div className="listing-photo-badges"><Badge tone={listing.dietType === 'veg' ? 'green' : 'amber'}><span className="diet-dot"/>{listing.dietType === 'veg' ? 'Vegetarian' : 'Non-vegetarian'}</Badge>{listing.isPrivate && <Badge><LockKeyhole size={11}/>Private</Badge>}</div>{onReport && <button className="report-button" aria-label={`Report ${listing.foodName}`} onClick={() => onReport(listing)}><Flag size={14}/></button>}</div>
+    <div className="listing-body"><div className="between"><span className="eyebrow" style={{ fontSize: 8 }}>{listing.category}</span>{available ? <CountdownRing until={listing.pickupBy}/> : <Badge>{listing.status}</Badge>}</div><h3>{listing.foodName}</h3><div className="row listing-donor">{listing.donor?.name || 'A neighbour in Jaipur'}{listing.donor?.verificationStatus === 'verified' && <ShieldCheck size={13}/>}</div><div className="listing-meta"><span><Users size={14}/>{listing.servings} servings</span><span><MapPin size={14}/>{listing.neighbourhood || 'Jaipur'}{listing.distance != null ? ` · ${listing.distance.toFixed(1)} km` : ''}</span></div><div className="listing-footer"><span className="muted" style={{ fontSize: 10 }}>Good food. Freely shared.</span><Button size="sm" variant="secondary" onClick={() => onOpen(listing)}>{available ? 'View donation' : 'View details'}<ArrowUpRight size={14}/></Button></div></div>
+  </Card>;
+}
