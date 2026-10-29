@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config.js';
+import { root } from './config.js';
+import path from 'node:path';
 import { authRouter, optionalAuth } from './auth.js';
 import { errorHandler } from './http.js';
 import { listingsRouter } from './routes/listings.js';
@@ -16,6 +18,7 @@ export function createApp(databaseMode) {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
   app.use(cors({ origin: config.origins }));
   app.use(express.json({ limit: '1mb' }));
+  app.use('/seed-assets',express.static(path.join(root,'server','seed-assets')));
   app.get('/api/health', (_req, res) => res.json({ status: 'ok', databaseMode, demo: config.demo }));
   app.use('/api', optionalAuth);
   app.use('/api/auth', authRouter);
