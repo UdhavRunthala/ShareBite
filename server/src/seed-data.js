@@ -31,7 +31,8 @@ export const ngos = [
   ['Saath Meal Mission', 'A proposed food distribution service awaiting corrected registration documents.', 120],
 ];
 const imageIds = ['1546833999-b9f581a1996d','1565557623262-b51c2513a641','1631452180519-c014fe946bc7','1512621776951-a57141f2eefd','1509440159596-0249088772ff','1555507036-ab1f4038808a','1601050690597-df0568f70950','1547592180-85f173990554','1567620905732-2d1ec7ab7445','1565299624946-b28f40a0ae38','1498837167922-ddd27525d352','1519869325930-281384150729','1484723091739-30a097e8f929','1565958011703-44f9829ba187','1546069901-ba9599a7e63c','1540189549336-e6e99c3679fe','1473093226795-af9932fe5856','1504674900247-0877df9cc836','1574484284002-952d92456975','1603894584373-5ac82b2ae398'];
-export const photos = imageIds.map(id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=80`);
+export const sourcePhotos = imageIds.map(id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=80`);
+export const photos = imageIds.map((_id,index)=>`/seed-assets/food-${String(index+1).padStart(2,'0')}.jpg`);
 export const foods = [
   ['Dal makhani & jeera rice','Cooked meals','veg','Freshly prepared slow-cooked dal with fragrant cumin rice. Packed separately for easy serving.',['milk']],
   ['Vegetable biryani','Cooked meals','veg','Fragrant basmati rice with seasonal vegetables, herbs and mild spices.',['nuts']],

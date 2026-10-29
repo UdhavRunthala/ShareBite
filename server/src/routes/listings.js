@@ -11,7 +11,7 @@ export const listingInput = z.object({
   foodName: z.string().trim().min(3).max(100), description: z.string().trim().min(10).max(2000),
   category: z.enum(['Cooked meals', 'Bakery', 'Packaged', 'Produce', 'Sweets']), dietType: z.enum(['veg', 'non-veg']),
   quantity: z.string().trim().min(1).max(60), servings: z.coerce.number().int().min(1).max(10000),
-  allergens: z.array(z.string().max(40)).max(15).default([]), photos: z.array(z.string().max(500).refine(v => /^\/api\/uploads\/[a-f\d]{24}$/.test(v) || /^https:\/\/images\.unsplash\.com\//.test(v), 'Use an uploaded food photo.')).max(5).default([]),
+  allergens: z.array(z.string().max(40)).max(15).default([]), photos: z.array(z.string().max(500).refine(v => /^\/api\/uploads\/[a-f\d]{24}$/.test(v) || /^\/seed-assets\/food-\d{2}\.jpg$/.test(v), 'Use an uploaded food photo.')).max(5).default([]),
   cookedAt: z.coerce.date(), pickupBy: z.coerce.date(),
   location: z.object({ type: z.literal('Point').default('Point'), coordinates: z.tuple([z.number().min(-180).max(180), z.number().min(-90).max(90)]) }),
   neighbourhood: z.string().trim().min(2).max(80), exactAddress: z.string().trim().min(10).max(500),
