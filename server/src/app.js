@@ -8,6 +8,8 @@ import { listingsRouter } from './routes/listings.js';
 import { ordersRouter } from './routes/orders.js';
 import { uploadsRouter } from './routes/uploads.js';
 import { chatRouter, notificationsRouter } from './routes/chat.js';
+import { statsRouter, leaderboardRouter, certificatesRouter } from './routes/impact.js';
+import { ngosRouter, usersRouter, demandsRouter, reportsRouter } from './routes/community.js';
 export function createApp(databaseMode) {
   const app = express();
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
@@ -21,6 +23,13 @@ export function createApp(databaseMode) {
   app.use('/api/uploads', uploadsRouter);
   app.use('/api/chat', chatRouter);
   app.use('/api/notifications', notificationsRouter);
+  app.use('/api/stats',statsRouter);
+  app.use('/api/leaderboard',leaderboardRouter);
+  app.use('/api/certificates',certificatesRouter);
+  app.use('/api/ngos',ngosRouter);
+  app.use('/api/users',usersRouter);
+  app.use('/api/demands',demandsRouter);
+  app.use('/api/reports',reportsRouter);
   app.use('/api', (_req, res) => res.status(404).json({ message: 'This endpoint does not exist.' }));
   app.use(errorHandler);
   return app;
