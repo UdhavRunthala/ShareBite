@@ -26,6 +26,12 @@ try {
       await page.waitForURL('http://localhost:5173/');
       if (!await page.evaluate(()=>localStorage.getItem('sharebite-token'))) throw new Error('Missing session');
     }
+    await page.goto('http://localhost:5173/discover');
+    await page.getByRole('button',{name:'View donation'}).first().waitFor();
+    await page.screenshot({path:`.cache/screenshots/discovery-${width}.png`,fullPage:true});
+    await page.getByRole('button',{name:'Map',exact:true}).click();
+    await page.locator('.leaflet-container').waitFor();
+    await page.screenshot({path:`.cache/screenshots/map-${width}.png`,fullPage:true});
     await page.close();
   }
   if(errors.length)throw new Error(errors.join('\n'));
