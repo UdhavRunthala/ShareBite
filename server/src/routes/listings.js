@@ -5,6 +5,7 @@ import { asyncRoute, HttpError } from '../http.js';
 import { allow, verified } from '../auth.js';
 import { safeUntil, distanceKm } from '../domain.js';
 import { notify, emitPublic } from '../events.js';
+import { requireOwnedUpload } from './uploads.js';
 export const listingsRouter = Router();
 export const listingInput = z.object({
   foodName: z.string().trim().min(3).max(100), description: z.string().trim().min(10).max(2000),
@@ -27,6 +28,7 @@ export function serializeListing(listing, user) {
   return data;
 }
 async function createListing(input, donor) {
+  for (const photo of input.photos) if (photo.startsWith('/api/uploads/')) await requireOwnedUpload(photo,donor._id,'food');
   const now = Date.now(), safety = safeUntil(input.category, input.cookedAt);
   if (input.cookedAt.getTime() > now + 60000 || input.pickupBy.getTime() <= now || input.pickupBy > safety) throw new HttpError(400, 'Choose a future pickup deadline within the food’s safety window. Cooked time cannot be in the future.');
   if (input.isPrivate && !await User.exists({ _id: input.invitedNgo, role: 'ngo', verificationStatus: 'verified', banned: false })) throw new HttpError(400, 'Choose a verified NGO for a private donation.');

@@ -5,6 +5,8 @@ import { config } from './config.js';
 import { authRouter, optionalAuth } from './auth.js';
 import { errorHandler } from './http.js';
 import { listingsRouter } from './routes/listings.js';
+import { ordersRouter } from './routes/orders.js';
+import { uploadsRouter } from './routes/uploads.js';
 export function createApp(databaseMode) {
   const app = express();
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'same-site' } }));
@@ -14,6 +16,8 @@ export function createApp(databaseMode) {
   app.use('/api', optionalAuth);
   app.use('/api/auth', authRouter);
   app.use('/api/listings', listingsRouter);
+  app.use('/api/orders', ordersRouter);
+  app.use('/api/uploads', uploadsRouter);
   app.use('/api', (_req, res) => res.status(404).json({ message: 'This endpoint does not exist.' }));
   app.use(errorHandler);
   return app;
