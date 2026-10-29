@@ -10,8 +10,9 @@ mkdirSync('.cache/screenshots', { recursive: true });
 try {
   for (const width of [1440, 390]) {
     const page = await browser.newPage({ viewport: { width, height: 960 } });
-    page.on('pageerror', error => errors.push(error.message));
-    await page.goto('http://localhost:5173', { waitUntil: 'networkidle' });
+    page.on('pageerror', error => { errors.push(error.message); console.error(error.message); });
+    page.on('console', message => { if (message.type() === 'error') console.error(message.text()); });
+    await page.goto('http://localhost:5173', { waitUntil: 'domcontentloaded' });
     await page.getByRole('heading', { name: 'ShareBite', exact: true }).waitFor();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     if (overflow) errors.push(`Horizontal overflow at ${width}px`);
@@ -23,3 +24,4 @@ try {
   if (errors.length) throw new Error(errors.join('\n'));
   console.log('Desktop/mobile browser smoke and API health checks passed.');
 } finally { await browser.close(); }
+
