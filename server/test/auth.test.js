@@ -1,0 +1,20 @@
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import request from 'supertest';
+import { createApp } from '../src/app.js';
+import { connectDatabase, closeDatabase } from '../src/db.js';
+let app;
+before(async () => { app = createApp(await connectDatabase()); });
+after(closeDatabase);
+test('registration cannot grant admin access and never returns password hashes', async () => {
+  const invalid = await request(app).post('/api/auth/register').send({ name: 'Invalid role', email: 'invalid@example.test', password: 'Demo@1234', role: 'admin' });
+  assert.equal(invalid.status, 400);
+  const register = await request(app).post('/api/auth/register').send({ name: 'Test NGO', email: 'ngo@example.test', password: 'Demo@1234', role: 'ngo' });
+  assert.equal(register.status, 201);
+  assert.equal(register.body.user.verificationStatus, 'pending');
+  assert.equal(JSON.stringify(register.body).includes('passwordHash'), false);
+  const me = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${register.body.token}`);
+  assert.equal(me.status, 200);
+  const denied = await request(app).get('/api/auth/me');
+  assert.equal(denied.status, 401);
+});

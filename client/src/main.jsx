@@ -1,5 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import '@fontsource/fraunces/latin-500.css';
+import '@fontsource/fraunces/latin-500-italic.css';
+import '@fontsource/plus-jakarta-sans/latin-400.css';
+import '@fontsource/plus-jakarta-sans/latin-600.css';
+import '@fontsource/plus-jakarta-sans/latin-700.css';
 import { MotionConfig } from 'framer-motion';
 import { Brand, ThemeToggle, Card, Badge, Button, CountdownRing, StatusTimeline, StatCard } from './components/ui';
 import './styles.css';
