@@ -11,6 +11,7 @@ const document = `docs/pull-requests/${branch.replaceAll('/', '-')}.md`;
 if (!existsSync(document)) throw new Error(`Missing PR description: ${document}`);
 run('npm', ['run', 'lint']);
 run('npm', ['run', 'build']);
+if (existsSync('server/test/platform.test.js')) run('npm', ['run', 'test']);
 writeFileSync(document, readFileSync(document, 'utf8').replace('- [ ] Lint/build passes', '- [x] Lint/build passes'));
 git('add', document);
 if (git('diff', '--cached', '--name-only')) git('commit', '-m', `docs(workflow): record verification for ${branch}`, '-m', 'Record the reviewed branch scope and successful lint/build results. Preserve the PR description in the repository for future reference.');
